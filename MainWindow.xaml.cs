@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -9,7 +9,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.IO;
-using System.Net.NetworkInformation;
 
 namespace BoltKezeloApp
 {
@@ -114,10 +113,18 @@ namespace BoltKezeloApp
             tvCustomers.ItemsSource = customerViewModels;
         }
 
+
+        private void MenuAdd_Click(object sender, RoutedEventArgs e)
+        {
+            MainView.Visibility = Visibility.Collapsed;
+            StatisticsView.Visibility = Visibility.Collapsed;
+            AddView.Visibility = Visibility.Visible;
+        }
         private void MenuMainView_Click(object sender, RoutedEventArgs e)
         {
             MainView.Visibility = Visibility.Visible;
             StatisticsView.Visibility = Visibility.Collapsed;
+            AddView.Visibility = Visibility.Collapsed;
         }
 
         private void MenuStatistics_Click(object sender, RoutedEventArgs e)
@@ -125,6 +132,7 @@ namespace BoltKezeloApp
             ShowAllPurchases();
             MainView.Visibility = Visibility.Collapsed;
             StatisticsView.Visibility = Visibility.Visible;
+            AddView.Visibility = Visibility.Collapsed;
         }
 
         private void ShowAllPurchases()
@@ -166,6 +174,103 @@ namespace BoltKezeloApp
                 tbStatistics.Text = "Nincs vásárlási adat.";
             }
         }
+
+        private void BtnAddProduct_Click(object sender, RoutedEventArgs e)
+        {
+           
+            string code = tbProductCode.Text.Trim();
+            string name = tbProductName.Text.Trim();
+            if (!decimal.TryParse(tbProductPrice.Text.Trim(), out decimal price))
+            {
+                MessageBox.Show("Az ár nem érvényes szám.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            if (!int.TryParse(tbProductStock.Text.Trim(), out int stock))
+            {
+                MessageBox.Show("A készlet nem érvényes szám.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(name))
+            {
+                MessageBox.Show("Kérlek töltsd ki a termék kódját és nevét.", "Hiányzó adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+          
+            if (store.Products.Any(p => p.ProductCode == code))
+            {
+                MessageBox.Show("Ez a termékkód már létezik.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+           
+            Product newProduct = new Product
+            {
+                ProductCode = code,
+                Name = name,
+                Price = price,
+                Stock = stock
+            };
+
+            store.Products.Add(newProduct);
+
+            
+            RefreshViews();
+
+            tbProductCode.Clear();
+            tbProductName.Clear();
+            tbProductPrice.Clear();
+            tbProductStock.Clear();
+
+            MessageBox.Show("Termék sikeresen hozzáadva!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            
+            MainView.Visibility = Visibility.Visible;
+            AddView.Visibility = Visibility.Collapsed;
+        }
+
+        private void BtnAddCustomer_Click(object sender, RoutedEventArgs e)
+        {
+            string id = tbCustomerId.Text.Trim();
+            string name = tbCustomerName.Text.Trim();
+
+            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(name))
+            {
+                MessageBox.Show("Kérlek töltsd ki az azonosítót és a nevet.", "Hiányzó adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            
+            if (store.Customers.Any(c => c.CustomerId == id))
+            {
+                MessageBox.Show("Ez az azonosító már használatban van.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            Customer newCustomer = new Customer
+            {
+                CustomerId = id,
+                Name = name
+            };
+
+            store.Customers.Add(newCustomer);
+
+            RefreshViews();
+
+            tbCustomerId.Clear();
+            tbCustomerName.Clear();
+
+            MessageBox.Show("Vásárló sikeresen hozzáadva!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            MainView.Visibility = Visibility.Visible;
+            AddView.Visibility = Visibility.Collapsed;
+        }
+
+
+
+
+
     }
 
 
