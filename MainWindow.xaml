@@ -1,19 +1,18 @@
-﻿<Window x:Class="BoltKezeloApp.MainWindow"
+<Window x:Class="BoltKezeloApp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BoltKezeloApp"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="900">
-
+        Title="MainWindow" Height="450" Width="800">
     <DockPanel>
 
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="Nézetek">
                 <MenuItem Header="Főnézet" Click="MenuMainView_Click"/>
                 <MenuItem Header="Statisztika" Click="MenuStatistics_Click"/>
-                <MenuItem Header="Hozzáadás"/>
+                <MenuItem Header="Hozzáadás" Click="MenuAdd_Click"/>
             </MenuItem>
         </Menu>
 
@@ -66,13 +65,38 @@
             <StackPanel Orientation="Vertical" Margin="10" VerticalAlignment="Top">
                 <GroupBox Header="Új termék hozzáadása" Margin="0,0,0,10">
                     <StackPanel Margin="10">
-
-                        <Button Content="Termék hozzáadása"  Margin="0,5,0,0"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <Label Content="Kód:" Width="50"/>
+                            <TextBox x:Name="tbProductCode" Width="200"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <Label Content="Név:" Width="50"/>
+                            <TextBox x:Name="tbProductName" Width="200"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <Label Content="Ár:" Width="50"/>
+                            <TextBox x:Name="tbProductPrice" Width="200"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <Label Content="Készlet:" Width="50"/>
+                            <TextBox x:Name="tbProductStock" Width="200"/>
+                        </StackPanel>
+                        <Button Content="Termék hozzáadása" Margin="0,5,0,0" Click="BtnAddProduct_Click"/>
                     </StackPanel>
                 </GroupBox>
 
                 <GroupBox Header="Új vásárló hozzáadása">
-
+                    <StackPanel Margin="10">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <Label Content="Azonosító:" Width="70"/>
+                            <TextBox x:Name="tbCustomerId" Width="200"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <Label Content="Név:" Width="70"/>
+                            <TextBox x:Name="tbCustomerName" Width="200"/>
+                        </StackPanel>
+                        <Button Content="Vásárló hozzáadása" Margin="0,5,0,0" Click="BtnAddCustomer_Click"/>
+                    </StackPanel>
                 </GroupBox>
             </StackPanel>
         </Grid>
