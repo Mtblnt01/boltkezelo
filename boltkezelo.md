@@ -184,4 +184,234 @@ private void LoadCustomers(string fileName)
 ```
 
 # RefreshViews
+-frissítísi a vásárlásokat, létrehoz egy customerViewModels listát illetve a product namejet és a darabszámát kiírja egy listában
+        
+        private void RefreshViews()
+        {
+            lvProducts.ItemsSource = null;
+            lvProducts.ItemsSource = store.Products;
 
+            List<CustomerViewModel> customerViewModels = new List<CustomerViewModel>();
+            foreach (Customer customer in store.Customers)
+            {
+                CustomerViewModel vm = new CustomerViewModel
+                {
+                    Name = customer.Name,
+                    Purchases = customer.Purchases
+                        .Select(p => $"{p.Product.Name} - {p.Quantity} db")
+                        .ToList()
+                };
+                customerViewModels.Add(vm);
+            }
+            tvCustomers.ItemsSource = customerViewModels;
+        }
+
+# MenuAdd_Click
+
+ Az add menut nyissa meg az összes többit collapsedre teszi
+
+    private void MenuAdd_Click(object sender, RoutedEventArgs e)
+    {
+        MainView.Visibility = Visibility.Collapsed;
+        StatisticsView.Visibility = Visibility.Collapsed;
+        AddView.Visibility = Visibility.Visible;
+    }
+
+# MenuMainView_Click
+
+A fő menüt nyissa meg a többit collapsedre teszi
+
+    private void MenuMainView_Click(object sender, RoutedEventArgs e)
+    {
+        MainView.Visibility = Visibility.Visible;
+        StatisticsView.Visibility = Visibility.Collapsed;
+        AddView.Visibility = Visibility.Collapsed;
+    }
+
+# MenuStatistics_Click
+
+A statisztikát nyissa meg a többit collapsedre teszi
+
+    private void MenuStatistics_Click(object sender, RoutedEventArgs e)
+    {
+        ShowAllPurchases();
+        MainView.Visibility = Visibility.Collapsed;
+        StatisticsView.Visibility = Visibility.Visible;
+        AddView.Visibility = Visibility.Collapsed;
+    }
+
+# ShowAllPurchases
+
+Statisztikába egy String,Int dictionaryba kiiratja a felhasználókhoz tartozó termékeket illetve hogy hány termék lett vásárolva
+
+
+        private void ShowAllPurchases()
+    {
+        Dictionary<string, int> stats = new Dictionary<string, int>();
+    
+        foreach (Customer customer in store.Customers)
+        {
+            foreach (PurchasedItem purchase in customer.Purchases)
+            {
+                string code = purchase.Product.ProductCode;
+                int quantity = purchase.Quantity;
+    
+                if (stats.ContainsKey(code))
+                    stats[code] += quantity;
+                else
+                    stats[code] = quantity;
+            }
+        }
+    
+        if (stats.Any())
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Termék vásárlási statisztika:\n");
+    
+            foreach (var entry in stats.OrderByDescending(x => x.Value))
+            {
+                Product p = store.Products.FirstOrDefault(prod => prod.ProductCode == entry.Key);
+                if (p != null)
+                {
+                    sb.AppendLine($"{p.Name} ({p.ProductCode}) - {entry.Value} db");
+                }
+            }
+    
+            tbStatistics.Text = sb.ToString();
+        }
+        else
+        {
+            tbStatistics.Text = "Nincs vásárlási adat.";
+        }
+    }
+
+# BtnAddProduct_Click
+            private void BtnAddProduct_Click(object sender, RoutedEventArgs e)
+    {
+    
+        string code = tbProductCode.Text.Trim();
+        string name = tbProductName.Text.Trim();
+        if (!decimal.TryParse(tbProductPrice.Text.Trim(), out decimal price))
+        {
+            MessageBox.Show("Az ár nem érvényes szám.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+        if (!int.TryParse(tbProductStock.Text.Trim(), out int stock))
+        {
+            MessageBox.Show("A készlet nem érvényes szám.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+    
+        if (string.IsNullOrEmpty(code) || string.IsNullOrEmpty(name))
+        {
+            MessageBox.Show("Kérlek töltsd ki a termék kódját és nevét.", "Hiányzó adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+    
+    
+        if (store.Products.Any(p => p.ProductCode == code))
+        {
+            MessageBox.Show("Ez a termékkód már létezik.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+    
+    
+        Product newProduct = new Product
+        {
+            ProductCode = code,
+            Name = name,
+            Price = price,
+            Stock = stock
+        };
+    
+        store.Products.Add(newProduct);
+    
+    
+        RefreshViews();
+    
+        tbProductCode.Clear();
+        tbProductName.Clear();
+        tbProductPrice.Clear();
+        tbProductStock.Clear();
+    
+        MessageBox.Show("Termék sikeresen hozzáadva!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+    
+    
+        MainView.Visibility = Visibility.Visible;
+        AddView.Visibility = Visibility.Collapsed;
+    }
+
+# BtnAddCustomer_Click
+
+            private void BtnAddCustomer_Click(object sender, RoutedEventArgs e)
+        {
+            string id = tbCustomerId.Text.Trim();
+            string name = tbCustomerName.Text.Trim();
+    
+            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(name))
+            {
+                MessageBox.Show("Kérlek töltsd ki az azonosítót és a nevet.", "Hiányzó adat", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+    
+    
+            if (store.Customers.Any(c => c.CustomerId == id))
+            {
+                MessageBox.Show("Ez az azonosító már használatban van.", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+    
+            Customer newCustomer = new Customer
+            {
+                CustomerId = id,
+                Name = name
+            };
+    
+            store.Customers.Add(newCustomer);
+    
+            RefreshViews();
+    
+            tbCustomerId.Clear();
+            tbCustomerName.Clear();
+    
+            MessageBox.Show("Vásárló sikeresen hozzáadva!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+    
+            MainView.Visibility = Visibility.Visible;
+            AddView.Visibility = Visibility.Collapsed;
+        }
+    }
+
+
+# Classok
+    public class Product
+    {
+        public string ProductCode { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+        public int Stock { get; set; }
+    }
+    
+    public class PurchasedItem
+    {
+        public Product Product { get; set; }
+        public int Quantity { get; set; }
+    }
+    
+    public class Customer
+    {
+        public string Name { get; set; }
+        public string CustomerId { get; set; }
+        public List<PurchasedItem> Purchases { get; set; } = new List<PurchasedItem>();
+    }
+    
+    public class StoreManager
+    {
+        public List<Product> Products { get; set; } = new List<Product>();
+        public List<Customer> Customers { get; set; } = new List<Customer>();
+    }
+    
+    public class CustomerViewModel
+    {
+        public string Name { get; set; }
+        public List<string> Purchases { get; set; }
+    }
